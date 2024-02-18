@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../code')
+sys.path.append('./src/code')
 import recommendation_engine as re
 
 def mostrar_menu():
@@ -10,9 +10,18 @@ def mostrar_menu():
 
 def log_in():
     while True:
+        user_id = -1
         usuario = input("Usuario: ")
-        if re.exist_userid(usuario):
+        try:
+            user_id = int(usuario) 
+            print("ID de usuario ingresado:", user_id)
+        except ValueError:
+            print("Por favor, ingrese un número entero válido.")
+
+
+        if re.exist_userid(user_id):
             print("User accepted")
+            return user_id
         else:
             print("Incorrect user. Please try again."
 )
@@ -20,7 +29,10 @@ def log_in():
 def obtener_recomendaciones(user_id):
     # Aquí iría la lógica para obtener las recomendaciones de películas para el usuario
     print(f"Estas son las recomendaciones para {user_id}:")
-    re.get_topn_movies(user_id,20)
+    movies = re.get_topn_movies(user_id, 20)
+    for movie in movies:  # No es necesario utilizar iter() aquí
+        print(movie)
+
 
 
 def ver_detalles_pelicula():
@@ -33,7 +45,7 @@ def main():
         opcion = input("Por favor, seleccione una opción: ")
 
         if opcion == "1":
-            usuario = log_in
+            usuario = log_in()
             if usuario:
                 while True:
                     print("\nMenú principal:")

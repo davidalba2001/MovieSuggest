@@ -13,9 +13,10 @@ RATINGS_PATH = 'src/datasets/ml-100k/u.data'
 
 data_usersId = dp.get_userId(USERS_PATH)
 
-def exist_userid(user_id):
+def exist_userid(user_id: int) -> bool:
+    print(data_usersId)
     ''' Revisa si existe user id en los datos del sistema '''
-    return True if user_id in data_usersId else False
+    return user_id in data_usersId['user_id']
 
 
 data_movie = dp.load_movies_data(MOVIES_PATH)
@@ -133,5 +134,8 @@ def get_topn_movies(user_id, n):
         similar_userid += 1
         top_movies.extend(movie_names)  # Usar extend() para agregar películas individualmente
         if len(top_movies) > n:
-            return top_movies[:n]
+           break
+    
+    return top_movies[:n]
+
 
