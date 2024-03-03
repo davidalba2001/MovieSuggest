@@ -74,20 +74,6 @@ La matriz de correlacion esta desordenada por default
 # print(test_correlation_sorted(correlation_usermovie))
 
 def get_similar_items(items_id, correlation_matrix, threshold_low, threshold_high):
-    """
-    Encuentra elementos similares a un elemento dado basado en una matriz de correlación.
-
-    Parámetros:
-        items_id (int): El ID del elemento para el que se buscarán elementos similares.
-        correlation_matrix (list): Una matriz de correlación donde cada fila representa las correlaciones
-            del elemento dado con otros elementos.
-        threshold_low (float): El umbral inferior para considerar la correlación como significativa.
-        threshold_high (float): El umbral superior para considerar la correlación como significativa.
-
-    Retorna:
-        list: Una lista de IDs de elementos similares que cumplen con los criterios de umbral especificados,
-        ordenados de mayor a menor similitud.
-    """
     similar_items = []
     items_row = correlation_matrix[items_id]
     # Crear una lista de tuplas (ID del elemento, correlación)
@@ -96,9 +82,6 @@ def get_similar_items(items_id, correlation_matrix, threshold_low, threshold_hig
     # Ordenar la lista de tuplas por correlación de mayor a menor
     similar_items_with_correlation.sort(key=lambda x: x[1], reverse=True)
     return similar_items_with_correlation
-    # Extraer solo los IDs de los elementos similares ordenados
-    """similar_items = [item[0] for item in similar_items_with_correlation]
-    return similar_items"""
 
 def get_user_similarity_recommendations(user_id,similar_users,similar_user):
     vector_user = data_usermovie[user_id]
@@ -138,4 +121,9 @@ def get_topn_movies(user_id, n):
     
     return top_movies[:n]
 
+def save_ratings_newuser(vect_rating):
+    n_users += 1
+    new_user_ratings = op.create_new_user_ratings_vector(vect_rating,n_users+1)
+    data_usermovie = op.add_new_user_ratings(data_usermovie, new_user_ratings)
+    return n_users
 

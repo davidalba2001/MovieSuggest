@@ -8,23 +8,7 @@ import recommendation_engine as re
 app = dash.Dash(__name__)
 
 # Diseño de la aplicación
-app.layout = html.Div([
-    # Encabezado
-    html.H1("Sistema de Recomendaciones de Películas", style={'text-align': 'center', 'margin-bottom': '30px'}),
 
-    # Formulario de inicio de sesión
-    html.Div([
-        html.H2("Inicio de Sesión", style={'margin-bottom': '15px'}),
-        dcc.Input(id='input-usuario', type='text', placeholder='Usuario', style={'margin-bottom': '10px'}),
-        html.Button('Iniciar Sesión', id='boton-login', n_clicks=0, style={'margin-bottom': '10px'}),
-        html.Div(id='output-login')
-    ], style={'width': '50%', 'margin': 'auto', 'text-align': 'center', 'padding': '20px', 'border': '1px solid #ccc', 'border-radius': '10px', 'box-shadow': '0px 0px 10px 0px rgba(0,0,0,0.1)'}),
-
-    # Sección de recomendaciones de películas
-    html.Div(id='recomendaciones-container', style={'display': 'none', 'margin-top': '30px'}),
-    html.H3("Recomendaciones de Películas", style={'text-align': 'center', 'margin-bottom': '15px'}),
-    html.Div(id='recomendaciones')
-])
 
 # Callback para manejar el inicio de sesión
 @app.callback(
