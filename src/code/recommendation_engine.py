@@ -5,6 +5,8 @@ import data_processing as dp
 import utils as utl
 import matrix_operations as op
 import sys
+import numpy as  np
+from typing import Dict
 sys.path.append('/home/d4v3_S145/repos/MovieSuggest/src/code')
 
 USERS_PATH = 'src/datasets/ml-100k/u.user'
@@ -25,7 +27,23 @@ data_ratings = dp.load_ratings_data(RATINGS_PATH)
 n_users = data_ratings.user_id.unique().shape[0]
 n_movies = data_ratings.movie_id.unique().shape[0]
 n_components = min(n_users, n_movies)
-data_usermovie, data_movieuser = op.create_dataMatrix(data_ratings)
+data_usermovie, data_movieuser = op.create_dataMatrix(data_ratings) 
+
+def add_vector_to_matrix(movie_ratings: dict, movie_list: list):
+    global data_usermovie
+    global n_users
+    
+    # Convertir el diccionario de clasificaciones en un vector
+    vector = np.zeros(len(movie_list))
+    for movie, rating in movie_ratings.items():
+        if movie in movie_list:
+            index = movie_list.index(movie)
+            vector[index] = rating
+    
+    # Agregar el vector a la matriz
+    extended_matrix = np.vstack([data_usermovie, vector])
+    data_usermovie = extended_matrix
+    return extended_matrix
 
 def test_simplify_information(n_components, porcent):
     (_, svd1) = op.calculate_svd(
@@ -47,17 +65,17 @@ def test_simplify_information(n_components, porcent):
     print("___________________________________________________________________________________________________")
     return n_sv
 
+correlation_usermovie = []
 '''
 Este test en este caso lanza 589 por lo que lo he comentado ya que conozco el resultado
 '''
 # test_simplify_information(n_components,90)
-
-resultant_usermovie, _ = op.calculate_svd(data_usermovie, 590) 
-resultant_movieuser, _ = op.calculate_svd(data_movieuser, 590)
-
-correlation_usermovie = op.calculate_correlation_matrix(resultant_usermovie)
-correlation_movieuser = op.calculate_correlation_matrix(resultant_movieuser)
-
+def calculate_correlation_matrix():
+    global correlation_usermovie
+    resultant_usermovie, _ = op.calculate_svd(data_usermovie, 590) 
+#   resultant_movieuser, _ = op.calculate_svd(data_movieuser, 590)
+    correlation_usermovie = op.calculate_correlation_matrix(resultant_usermovie)
+    #correlation_movieuser = op.calculate_correlation_matrix(resultant_movieuser)
 
 def test_decendent_sorted(vector_item):
     return all(vector_item[i] >= vector_item[i + 1] for i in range(len(vector_item) - 1))
@@ -82,7 +100,6 @@ def get_similar_items(items_id, correlation_matrix, threshold_low, threshold_hig
     # Ordenar la lista de tuplas por correlación de mayor a menor
     similar_items_with_correlation.sort(key=lambda x: x[1], reverse=True)
     return similar_items_with_correlation
-
 def get_user_similarity_recommendations(user_id,similar_users,similar_user):
     vector_user = data_usermovie[user_id]
     #similar_users = get_similar_items(user_id,correlation_usermovie,0.95,0.99)
@@ -93,7 +110,6 @@ def get_user_similarity_recommendations(user_id,similar_users,similar_user):
     recomend_movies = utl.calculate_intersection(unrated_movies,best_rated_movies)
     movie_ids = [tupla[0][0] for tupla in recomend_movies]
     return get_movie_names(movie_ids,data_movie)
-
 def get_movie_names(movie_ids, movies_dataframe):
     movie_names = []
     for movie_id in movie_ids:
@@ -105,10 +121,20 @@ def get_movie_names(movie_ids, movies_dataframe):
         else:
             movie_names.append("Película no encontrada")  # O cualquier mensaje que desees para películas no encontradas
     return movie_names
-
+def get_movies():
+    movie_names = []
+    for movie_id in range(len(data_movie)):
+        # Buscar el nombre de la película correspondiente al ID de la película
+        movie_name = data_movie.loc[data_movie['movie id'] == movie_id, 'movie title'].values
+        # Comprobar si se encontró un nombre para la película
+        if len(movie_name) > 0:
+            movie_names.append(movie_name[0])
+        else:
+            movie_names.append("Película no encontrada")  # O cualquier mensaje que desees para películas no encontradas
+    return movie_names
 def get_topn_movies(user_id, n):
     top_movies = []
-    similar_users = get_similar_items(user_id, correlation_usermovie, 0.35, 0.99)
+    similar_users = get_similar_items(user_id, correlation_usermovie, 0.1, 0.99)
     similar_userid = 0
     while True:
         if similar_userid >= len(similar_users):
@@ -120,10 +146,4 @@ def get_topn_movies(user_id, n):
            break
     
     return top_movies[:n]
-
-def save_ratings_newuser(vect_rating):
-    n_users += 1
-    new_user_ratings = op.create_new_user_ratings_vector(vect_rating,n_users+1)
-    data_usermovie = op.add_new_user_ratings(data_usermovie, new_user_ratings)
-    return n_users
 
